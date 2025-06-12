@@ -4,3 +4,5 @@ pandas==2.2.3
 numpy==1.26.4
 sentence-transformers==4.1.0
 scikit-learn==1.7.0
+jupyter==1.1.1
+Django==5.2.3
