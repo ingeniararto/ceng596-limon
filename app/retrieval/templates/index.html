@@ -1,0 +1,161 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Informalimon Retrieval</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="icon" href="{% static 'favicon.ico' %}" type="image/x-icon">
+
+    <style>
+        input[type='radio']:after {
+            width: 15px;
+            height: 15px;
+            border-radius: 15px;
+            top: -5px;
+            left: -1px;
+            position: relative;
+            background-color: #e8e8e8;
+            content: '';
+            display: inline-block;
+            visibility: visible;
+            border: 2px solid white;
+        }
+
+        input[type='radio']:checked:after {
+            width: 15px;
+            height: 15px;
+            border-radius: 15px;
+            top: -5px;
+            left: -1px;
+            position: relative;
+            background-color: #f4d136;
+            content: '';
+            display: inline-block;
+            visibility: visible;
+            border: 2px solid white;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen"
+      style="background-image: url('https://img.freepik.com/free-vector/vector-seamless-lemon-pattern-pastel-background_53876-117139.jpg?semt=ais_hybrid&w=740'); background-size: cover;">
+<div class="container mx-auto max-w-5xl bg-white p-6 rounded-lg shadow-lg flex h-[80vh] space-x-4 relative">
+    <div class="absolute -top-16 text-4xl font-bold bg-white p-4 -z-20 rounded-lg">
+        <h1 style="color: #73b996">Informa<span style="color: #f4d136">limon</span> Retrieval</h1>
+    </div>
+    <div class="w-1/2 flex flex-col space-y-4 pr-2">
+        <form method="GET" action="{% url 'index' %}" class="mb-4">
+            <div class="flex flex-col space-y-4">
+                <div class="flex space-x-2">
+                    <input
+                            type="text"
+                            name="query"
+                            placeholder="Enter your search query"
+                            class="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 m-1"
+                            value="{{ query|default_if_none:'' }}"
+                    >
+                    <button
+                            type="submit"
+                            class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 m-1"
+                            style="background-color: #73b996"
+                    >
+                        Search
+                    </button>
+                </div>
+                <div class="flex space-x-4 p-1">
+                    <label class="flex items-center hover:cursor-pointer">
+                        <input
+                                type="radio"
+                                name="search_type"
+                                value="BM25-Raw"
+                                {% if search_type == 'BM25-Raw' %}checked{% endif %}
+                                class="mr-2 hover:cursor-pointer"
+                        >
+                        BM25-Raw
+                    </label>
+                    <label class="flex items-center hover:cursor-pointer">
+                        <input
+                                type="radio"
+                                name="search_type"
+                                value="BM25"
+                                {% if search_type == 'BM25' %}checked{% endif %}
+                                class="mr-2 hover:cursor-pointer"
+                        >
+                        BM25
+                    </label>
+                    <label class="flex items-center hover:cursor-pointer">
+                        <input
+                                type="radio"
+                                name="search_type"
+                                value="PRF"
+                                {% if search_type == 'PRF' %}checked{% endif %}
+                                class="mr-2 hover:cursor-pointer"
+                        >
+                        PRF
+                    </label>
+                    <label class="flex items-center hover:cursor-pointer">
+                        <input
+                                type="radio"
+                                name="search_type"
+                                value="BERT"
+                                {% if search_type == 'BERT' %}checked{% endif %}
+                                class="mr-2 hover:cursor-pointer"
+                        >
+                        BERT
+                    </label>
+                </div>
+            </div>
+        </form>
+
+        <div class="space-y-2 overflow-y-auto">
+            {% for result in results %}
+                {% comment %}
+                    <a
+                        href="?query={{ query|urlencode }}&search_type={{ search_type|urlencode }}&selected={{ result.doc_id|urlencode }}"
+                        class="block border p-2 rounded-lg hover:bg-gray-100 {% if selected_doc_id == result.doc_id %}bg-blue-100{% endif %}"
+                    >
+                {% endcomment %}
+                <div class="block border p-4 rounded-lg hover:bg-gray-100 doc-card hover:cursor-pointer overflow-hidden">
+                    <strong>Rank:</strong>
+                    <p class="truncate" style="display: inline;"
+                       data-selected-doc-rank="{{ result.rank }}">{{ result.rank }}</p><br>
+                    <strong>Doc ID:</strong>
+                    <p class="truncate" style="display: inline;"
+                       data-selected-doc-id="{{ result.doc_id }}">{{ result.doc_id }}</p> <br>
+                    <div style="display: flex; align-items: center"><strong>Content: </strong> &nbsp;
+                    <p class="truncate inline-block max-w-l"
+                        data-selected-doc-content="{{ result.content }}">{{ result.content }}</p></div>
+
+                </div>
+            {% empty %}
+                <p class="text-gray-500">No results found.</p>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="w-1/2 bg-gray-50 p-4 rounded-lg overflow-y-auto" id="full-content">
+        <p class="text-gray-500">Select a document from the left to view its full content.</p>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
+<script>
+    $(document).on('click', '.doc-card', function () {
+        const fullContent = $(this).find('p[data-selected-doc-content]').data('selected-doc-content');
+        const docId = $(this).find('p[data-selected-doc-id]').data('selected-doc-id');
+        const rank = $(this).find('p[data-selected-doc-rank]').data('selected-doc-rank');
+
+        $('#full-content').html(`
+            <div>
+                <p><strong>Rank:</strong> ${rank}</p>
+                <p><strong>Doc ID:</strong> ${docId}</p>
+                <strong>Content:</strong>
+                <p>${fullContent}</p>
+            </div>
+        `);
+    });
+</script>
+</body>
+</html>
