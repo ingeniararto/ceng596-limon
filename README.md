@@ -1,4 +1,4 @@
-# CENG596 Term Project: Informalimon Retrieval
+# CENG596 Term Project: Informa*limon* Retrieval
 
 This project was developed as a term project for **Information Retrieval** course. It implements a basic retrieval system
 using the BM25 model on both preprocessed and raw data. The system is further enhanced with
@@ -78,9 +78,14 @@ Then open the `.ipynb` file from the browser and begin working.
 
 ---
 
-## ✅ Notes
+## Notes
 
 - The virtual environment must be active for both the Django app and the Jupyter notebook to work properly.
 - All dependencies are listed in `requirements.txt`.
 - If you encounter any issues during installation, feel free to contact us.
+
+
+## Poster
+![poster](./poster.png)
+
 
